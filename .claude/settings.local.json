@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm list:*)",
+      "Bash(grep -r \"jsdoc\\\\|jsDoc\\\\|doc\\\\|documentation\" /c/Documents/coding-projects/libraries/nest-forge/node_modules/orval/dist --include=*.d.ts)",
+      "Bash(find /c/Documents/coding-projects/libraries/nest-forge/node_modules/orval -name *.d.ts -type f)",
+      "Bash(xargs grep:*)",
+      "Bash(find /c/Documents/coding-projects/libraries/nest-forge/src -type f -name *.ts)",
+      "Bash(find /c/Documents/coding-projects/libraries/nest-forge/node_modules/@orval -name *.d.ts -type f)",
+      "Bash(find /c/Documents/coding-projects/libraries/nest-forge/node_modules/@orval/core -type f -name *.d.ts)",
+      "Bash(file /c/Documents/coding-projects/libraries/nest-forge/node_modules/@orval/core/dist/*.mts)",
+      "Bash(grep -r \"generateOptions\\\\|verbOptions\\\\|OutputClient\" /c/Documents/coding-projects/libraries/nest-forge/node_modules/@orval/core --include=*.d.ts --include=*.d.mts)",
+      "Bash(npm run:*)",
+      "WebSearch",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(npm view:*)",
+      "Bash(npm install:*)",
+      "Bash(npx jest:*)",
+      "Bash(node -e \"const { kebab, pascal } = require\\(''@orval/core''\\); console.log\\(''kebab:'', kebab\\(''user-service''\\), kebab\\(''PaymentGateway''\\), kebab\\(''SshSessionService''\\)\\); console.log\\(''pascal:'', pascal\\(''user-service''\\), pascal\\(''payment-gateway''\\), pascal\\(''ssh-session-service''\\)\\);\")",
+      "Bash(npx eslint:*)",
+      "Bash(npx prettier:*)",
+      "Bash(npm pack:*)",
+      "Bash(node dist/bin.js --version)",
+      "Bash(node dist/bin.js --help)"
+    ]
+  }
+}

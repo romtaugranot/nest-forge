@@ -1,0 +1,89 @@
+#!/usr/bin/env node
+
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { generate } from './generate';
+import { log } from './logger';
+
+interface ParsedArguments {
+  readonly input?: string;
+  readonly outputDir?: string;
+  readonly help: boolean;
+  readonly version: boolean;
+}
+
+const parseArgs = (argv: string[]): ParsedArguments => {
+  let input: string | undefined;
+  let outputDir: string | undefined;
+  let help = false;
+  let version = false;
+
+  for (let i = 2; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === '--help' || arg === '-h') {
+      help = true;
+    } else if (arg === '--version' || arg === '-v') {
+      version = true;
+    } else if (arg === '--input' || arg === '-i') {
+      input = argv[++i];
+    } else if (arg === '--output' || arg === '-o') {
+      outputDir = argv[++i];
+    } else if (!input) {
+      input = arg;
+    }
+  }
+
+  return { input, outputDir, help, version };
+};
+
+const getVersion = (): string => {
+  const packageJsonPath = join(__dirname, '..', 'package.json');
+  const content = readFileSync(packageJsonPath, 'utf-8');
+  const packageJson = JSON.parse(content) as { version: string };
+  return packageJson.version;
+};
+
+const printUsage = (): void => {
+  console.log(`
+  nest-forge - Generate NestJS client SDK modules from OpenAPI specs
+
+  Usage:
+    nest-forge <openapi-spec>  [options]
+    nest-forge --input <path|url>  [options]
+
+  Options:
+    -i, --input <path|url>  Path or URL to the OpenAPI spec (JSON)
+    -o, --output <dir>      Output directory (default: current directory)
+    -v, --version           Show version number
+    -h, --help              Show this help message
+
+  Examples:
+    nest-forge ./openapi.json
+    nest-forge --input ./api/spec.json --output ./sdk
+    nest-forge http://localhost:3000/api/docs-json --output ./sdk
+`);
+};
+
+const run = async (): Promise<void> => {
+  const { input, outputDir, help, version } = parseArgs(process.argv);
+
+  if (version) {
+    console.log(getVersion());
+    process.exit(0);
+  }
+
+  if (help || !input) {
+    printUsage();
+    process.exit(help ? 0 : 1);
+  }
+
+  try {
+    await generate({ input, outputDir });
+    log.info('Done.');
+  } catch (error) {
+    log.error('Generation failed:', error);
+    process.exit(1);
+  }
+};
+
+run();

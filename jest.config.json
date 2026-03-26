@@ -1,0 +1,16 @@
+{
+  "preset": "ts-jest",
+  "testEnvironment": "node",
+  "roots": ["<rootDir>/src"],
+  "testMatch": ["**/*.spec.ts"],
+  "moduleNameMapper": {
+    "^@orval/core$": "<rootDir>/src/__mocks__/@orval/core.ts"
+  },
+  "collectCoverageFrom": [
+    "src/**/*.ts",
+    "!src/index.ts",
+    "!src/bin.ts",
+    "!src/**/index.ts",
+    "!src/__mocks__/**"
+  ]
+}
