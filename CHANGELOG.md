@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.0] - 2026-03-26
+## [1.0.0] - 2026-03-26
 
 ### Added
 - CLI tool (`nest-forge` command) for generating NestJS client SDK modules from OpenAPI specs
