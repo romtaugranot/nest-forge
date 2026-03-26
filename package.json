@@ -48,6 +48,14 @@
   "author": "Rom Granot <rom.granot@gmail.com>",
   "license": "MIT",
   "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/romtaugranot/nest-forge.git"
+  },
+  "homepage": "https://github.com/romtaugranot/nest-forge#readme",
+  "bugs": {
+    "url": "https://github.com/romtaugranot/nest-forge/issues"
+  },
   "engines": {
     "node": ">=18.0.0"
   },
