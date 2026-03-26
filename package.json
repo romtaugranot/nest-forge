@@ -1,5 +1,5 @@
 {
-  "name": "nest-forge",
+  "name": "nest-forge-sdk",
   "version": "1.0.0",
   "description": "Generate NestJS client SDK modules from OpenAPI specs",
   "main": "./dist/index.js",

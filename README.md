@@ -1,7 +1,7 @@
 # nest-forge
 
-[![npm version](https://img.shields.io/npm/v/nest-forge.svg)](https://www.npmjs.com/package/nest-forge)
-[![license](https://img.shields.io/npm/l/nest-forge.svg)](https://github.com/romtaugranot/nest-forge/blob/main/LICENSE)
+[![npm version](https://img.shields.io/npm/v/nest-forge-sdk.svg)](https://www.npmjs.com/package/nest-forge-sdk)
+[![license](https://img.shields.io/npm/l/nest-forge-sdk.svg)](https://github.com/romtaugranot/nest-forge/blob/main/LICENSE)
 
 Generate fully-structured NestJS client SDK modules from OpenAPI specs. Point it at a spec, get a production-ready NestJS module with typed service, Zod validation, injectable routes, and dynamic module configuration.
 
@@ -35,7 +35,7 @@ Built on top of [orval](https://orval.dev) with a custom NestJS builder and post
 ## Installation
 
 ```bash
-npm install -D nest-forge
+npm install -D nest-forge-sdk
 ```
 
 The generated code requires these peer dependencies in your project:
@@ -59,7 +59,7 @@ npx nest-forge --input ./openapi.json --output ./libs
 ### Programmatic
 
 ```typescript
-import { generate } from 'nest-forge';
+import { generate } from 'nest-forge-sdk';
 
 await generate({
   input: './openapi.json',
@@ -291,7 +291,7 @@ Options:
 Runs the full generation pipeline.
 
 ```typescript
-import { generate } from 'nest-forge';
+import { generate } from 'nest-forge-sdk';
 
 await generate({
   input: './openapi.json',   // Path to OpenAPI spec (required)
@@ -305,7 +305,7 @@ The raw orval custom client builder, exported for advanced use cases where you w
 
 ```typescript
 import { defineConfig } from 'orval';
-import { nestjsBuilder } from 'nest-forge';
+import { nestjsBuilder } from 'nest-forge-sdk';
 
 export default defineConfig({
   api: {
@@ -325,7 +325,7 @@ export default defineConfig({
 The post-processing step as a standalone function, for use with custom orval configs:
 
 ```typescript
-import { postProcess } from 'nest-forge';
+import { postProcess } from 'nest-forge-sdk';
 
 // After running orval...
 postProcess('./model', './my-client');
