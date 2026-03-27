@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-03-27
+
+### Added
+- Claude Code plugin with SDK generator skill for AI-assisted API integration
+- Plugin structure (`.claude-plugin/plugin.json`, `skills/nestjs-sdk-generator/SKILL.md`)
+- Claude Code Integration section in README
+
 ## [1.2.2] - 2026-03-27
 
 ### Added

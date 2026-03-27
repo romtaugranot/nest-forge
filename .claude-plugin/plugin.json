@@ -1,0 +1,15 @@
+{
+  "name": "nest-forge-sdk",
+  "description": "AI-assisted NestJS SDK generation from OpenAPI specs using nest-forge-sdk. Guides you through spec discovery, SDK generation, and module wiring.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Rom Granot",
+    "email": "rom.granot@gmail.com"
+  },
+  "homepage": "https://github.com/romtaugranot/nest-forge#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/romtaugranot/nest-forge.git"
+  },
+  "license": "MIT"
+}

@@ -7,8 +7,33 @@ Generate fully-structured NestJS client SDK modules from OpenAPI specs (JSON or 
 
 Built on top of [orval](https://orval.dev) with a custom NestJS builder and post-processing pipeline.
 
+## Claude Code Integration
+
+nest-forge ships as a [Claude Code plugin](https://docs.anthropic.com/en/docs/claude-code) with an SDK generator skill that walks you through the entire workflow -- from finding an OpenAPI spec to wiring the generated module into your app.
+
+### Install the plugin
+
+```bash
+claude plugin add github:romtaugranot/nest-forge
+```
+
+Once installed, Claude Code will automatically suggest using `nest-forge-sdk` when you're integrating with an external API or mention OpenAPI specs. You can also invoke the skill directly:
+
+```
+/nest-forge-sdk:nestjs-sdk-generator
+```
+
+### What the skill does
+
+1. Helps you obtain an OpenAPI spec (finds published specs, or builds a minimal one from API docs)
+2. Installs `nest-forge-sdk` and peer dependencies
+3. Runs the generator with appropriate tag filtering
+4. Wires the generated module into your NestJS app using your preferred configuration pattern (`ConfigModule`, environment variables, etc.)
+5. Verifies the integration compiles and shows usage examples
+
 ## Table of Contents
 
+- [Claude Code Integration](#claude-code-integration)
 - [Features](#features)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
