@@ -8,13 +8,20 @@ import { log } from './logger';
 interface ParsedArguments {
   readonly input?: string;
   readonly outputDir?: string;
+  readonly tags?: string[];
+  readonly excludeTags?: string[];
   readonly help: boolean;
   readonly version: boolean;
 }
 
+const parseCsvArg = (value: string): string[] =>
+  value.split(',').map((tag) => tag.trim()).filter(Boolean);
+
 const parseArgs = (argv: string[]): ParsedArguments => {
   let input: string | undefined;
   let outputDir: string | undefined;
+  let tags: string[] | undefined;
+  let excludeTags: string[] | undefined;
   let help = false;
   let version = false;
 
@@ -28,12 +35,16 @@ const parseArgs = (argv: string[]): ParsedArguments => {
       input = argv[++i];
     } else if (arg === '--output' || arg === '-o') {
       outputDir = argv[++i];
+    } else if (arg === '--tags' || arg === '-t') {
+      tags = parseCsvArg(argv[++i]);
+    } else if (arg === '--exclude-tags') {
+      excludeTags = parseCsvArg(argv[++i]);
     } else if (!input) {
       input = arg;
     }
   }
 
-  return { input, outputDir, help, version };
+  return { input, outputDir, tags, excludeTags, help, version };
 };
 
 const getVersion = (): string => {
@@ -52,21 +63,25 @@ const printUsage = (): void => {
     nest-forge-sdk --input <path|url>  [options]
 
   Options:
-    -i, --input <path|url>  Path or URL to the OpenAPI spec (JSON/YAML)
-    -o, --output <dir>      Output directory (default: current directory)
-    -v, --version           Show version number
-    -h, --help              Show this help message
+    -i, --input <path|url>    Path or URL to the OpenAPI spec (JSON/YAML)
+    -o, --output <dir>        Output directory (default: current directory)
+    -t, --tags <tags>         Comma-separated tags to include (e.g. endpoint,user)
+        --exclude-tags <tags> Comma-separated tags to exclude
+    -v, --version             Show version number
+    -h, --help                Show this help message
 
   Examples:
     nest-forge-sdk ./openapi.json
     nest-forge-sdk ./openapi.yaml
     nest-forge-sdk --input ./api/spec.yml --output ./sdk
     nest-forge-sdk https://api.example.com/docs-json --output ./sdk
+    nest-forge-sdk ./spec.yaml --tags endpoint,user --output ./sdk
+    nest-forge-sdk ./spec.yaml --exclude-tags admin,internal
 `);
 };
 
 const run = async (): Promise<void> => {
-  const { input, outputDir, help, version } = parseArgs(process.argv);
+  const { input, outputDir, tags, excludeTags, help, version } = parseArgs(process.argv);
 
   if (version) {
     console.log(getVersion());
@@ -78,8 +93,13 @@ const run = async (): Promise<void> => {
     process.exit(help ? 0 : 1);
   }
 
+  if (tags && excludeTags) {
+    log.error('Cannot use --tags and --exclude-tags together.');
+    process.exit(1);
+  }
+
   try {
-    await generate({ input, outputDir });
+    await generate({ input, outputDir, tags, excludeTags });
     log.info('Done.');
   } catch (error) {
     log.error('Generation failed:', error);

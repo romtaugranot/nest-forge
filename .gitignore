@@ -6,3 +6,7 @@ coverage
 .nest-forge.spec.*
 .DS_Store
 Thumbs.db
+
+# Generated SDK output (test artifacts)
+ise-ers/
+model/

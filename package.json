@@ -1,6 +1,6 @@
 {
   "name": "nest-forge-sdk",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Generate NestJS client SDK modules from OpenAPI specs",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -81,7 +81,6 @@
   "peerDependencies": {
     "@nestjs/common": ">=10.0.0",
     "axios": ">=1.0.0",
-    "mustache": ">=4.0.0",
     "zod": ">=3.0.0"
   },
   "peerDependenciesMeta": {
@@ -89,9 +88,6 @@
       "optional": false
     },
     "axios": {
-      "optional": false
-    },
-    "mustache": {
       "optional": false
     },
     "zod": {

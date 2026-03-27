@@ -33,6 +33,36 @@ const extractSpecTitle = (parsed: unknown): string => {
   return typeof info.title === 'string' ? info.title : 'api';
 };
 
+const extractSpecTags = (parsed: unknown): string[] => {
+  if (!isRecord(parsed)) {
+    return [];
+  }
+  const { paths } = parsed;
+  if (!isRecord(paths)) {
+    return [];
+  }
+  const tagSet = new Set<string>();
+  for (const pathItem of Object.values(paths)) {
+    if (!isRecord(pathItem)) {
+      continue;
+    }
+    for (const operation of Object.values(pathItem)) {
+      if (!isRecord(operation)) {
+        continue;
+      }
+      const tags = operation.tags;
+      if (Array.isArray(tags)) {
+        for (const tag of tags) {
+          if (typeof tag === 'string') {
+            tagSet.add(tag);
+          }
+        }
+      }
+    }
+  }
+  return [...tagSet];
+};
+
 const noopWrite: typeof process.stdout.write = (): boolean => true;
 
 const suppressConsole = async <T>(fn: () => Promise<T>): Promise<T> => {
@@ -50,18 +80,27 @@ const suppressConsole = async <T>(fn: () => Promise<T>): Promise<T> => {
   }
 };
 
+interface OrvalFilters {
+  readonly mode: 'include' | 'exclude';
+  readonly tags: string[];
+}
+
 const writeTemporaryOrvalConfig = (
   configPath: string,
   inputPath: string,
   serviceTarget: string,
   modelDir: string,
+  filters?: OrvalFilters,
 ): void => {
+  const filtersStr = filters
+    ? `\n      filters: { mode: '${filters.mode}', tags: [${filters.tags.map((t) => `'${t}'`).join(', ')}] },`
+    : '';
   const content = `const { nestjsBuilder } = require('${BUILDER_IMPORT_PATH.replace(/\\/g, '/')}');
 
 module.exports = {
   api: {
     input: {
-      target: '${inputPath.replace(/\\/g, '/')}',
+      target: '${inputPath.replace(/\\/g, '/')}',${filtersStr}
     },
     output: {
       target: '${serviceTarget.replace(/\\/g, '/')}',
@@ -70,10 +109,27 @@ module.exports = {
       mode: 'single',
       clean: true,
       override: {
-        operationName: (operation) => {
+        operationName: (operation, route, verb) => {
           const operationId = operation.operationId ?? '';
-          const parts = operationId.split('_');
-          return parts.length > 1 ? parts[parts.length - 1] : operationId;
+          if (operationId) {
+            const parts = operationId.split('_');
+            return parts.length > 1 ? parts[parts.length - 1] : operationId;
+          }
+          const segments = route
+            .split('/')
+            .filter(Boolean)
+            .map((segment) => {
+              const paramMatch = segment.match(/^\\$\\{(.+)\\}$/) || segment.match(/^\\{(.+)\\}$/);
+              if (paramMatch) {
+                const paramName = paramMatch[1];
+                return 'by' + paramName[0].toUpperCase() + paramName.slice(1);
+              }
+              return segment;
+            });
+          const raw = [verb, ...segments].join('-');
+          return raw
+            .replace(/[^a-zA-Z0-9]+(.)/g, (_, char) => char.toUpperCase())
+            .replace(/^./, (char) => char.toLowerCase());
         },
       },
     },
@@ -122,9 +178,19 @@ export const generate = async (config: NestForgeConfig): Promise<void> => {
     // Ensure output base directory exists
     mkdirSync(outputBase, { recursive: true });
 
+    // Compute Orval tag filters from config
+    let filters: OrvalFilters | undefined;
+    if (config.tags) {
+      filters = { mode: 'include', tags: config.tags };
+      log.info(`  Tags (include): ${config.tags.join(', ')}`);
+    } else if (config.excludeTags) {
+      filters = { mode: 'exclude', tags: config.excludeTags };
+      log.info(`  Tags (exclude): ${config.excludeTags.join(', ')}`);
+    }
+
     // Write temporary orval config and run orval
     const tempConfigPath = join(outputBase, '.nest-forge.orval.cjs');
-    writeTemporaryOrvalConfig(tempConfigPath, inputPath, serviceTarget, modelDir);
+    writeTemporaryOrvalConfig(tempConfigPath, inputPath, serviceTarget, modelDir, filters);
 
     try {
       await suppressConsole(() => orvalGenerate(tempConfigPath));
@@ -135,7 +201,8 @@ export const generate = async (config: NestForgeConfig): Promise<void> => {
     log.info(`Orval generation completed in ${Date.now() - startTime}ms`);
 
     // Post-process: split model files into schemas/types, fix imports
-    postProcess(modelDir, outputDir);
+    const specTags = extractSpecTags(parsed);
+    postProcess(modelDir, outputDir, specTags);
 
     log.info(`Total generation completed in ${Date.now() - startTime}ms`);
   } finally {

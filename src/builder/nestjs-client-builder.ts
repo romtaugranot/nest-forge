@@ -65,10 +65,6 @@ const NESTJS_DEPENDENCIES: GeneratorDependency[] = [
     exports: [{ name: 'ZodType' }],
     dependency: 'zod',
   },
-  {
-    exports: [{ name: 'render', alias: 'renderRoute', values: true }],
-    dependency: 'mustache',
-  },
 ];
 
 const getNestjsDependencies: ClientDependenciesBuilder = (): GeneratorDependency[] => [
@@ -87,6 +83,7 @@ const generateNestjsHeader: ClientHeaderBuilder = ({ title }): string => {
 import { ${httpExceptionName}, ${validationExceptionName} } from './exceptions';
 import { AXIOS_INSTANCE_TOKEN, ROUTE_MAP_TOKEN } from './data';
 import type { ${routeMapName} } from './interfaces';
+import { renderRoute } from './utils';
 
 @Injectable()
 export class ${title} {
@@ -156,6 +153,14 @@ const generateNestjsImplementation = (
   const isVoid = dataType === 'void';
   const returnType = isVoid ? 'void' : dataType;
 
+  // Extract the primary (non-primitive) type for validateResponse schema argument.
+  // Union types like "FooResponse | string" are valid TS annotations but not valid
+  // JS expressions — only the schema identifier can be passed to validateResponse.
+  const PRIMITIVE_TYPES = new Set(['string', 'number', 'boolean', 'void', 'unknown', 'null', 'undefined']);
+  const primaryType = dataType.includes('|')
+    ? dataType.split('|').map((t) => t.trim()).find((t) => !PRIMITIVE_TYPES.has(t)) ?? dataType
+    : dataType;
+
   const axiosOptions = generateOptions({
     route,
     body,
@@ -207,7 +212,7 @@ const generateNestjsImplementation = (
     ${propsStr} ${optionsParam}): Promise<${returnType}> {
     try {${bodyForm}
       const { data: responseData } = await this.axiosInstance.${verb}<${returnType}>(${axiosOptionsWithRoute});
-      return this.validateResponse(${dataType}, responseData);
+      return this.validateResponse(${primaryType}, responseData);
     } catch (error) {
       this.handleError(error);
     }
@@ -227,7 +232,15 @@ const generateNestjsClient: ClientBuilder = (
   const valueImports: GeneratorImport[] = [];
 
   if (responseType && responseType !== 'void') {
-    valueImports.push({ name: responseType, values: true });
+    // For union types like "FooResponse | string", import only the primary
+    // (non-primitive) type as a value — primitives don't need importing.
+    const PRIMITIVE_TYPES = new Set(['string', 'number', 'boolean', 'void', 'unknown', 'null', 'undefined']);
+    const primaryImportType = responseType.includes('|')
+      ? responseType.split('|').map((t) => t.trim()).find((t) => !PRIMITIVE_TYPES.has(t))
+      : responseType;
+    if (primaryImportType) {
+      valueImports.push({ name: primaryImportType, values: true });
+    }
   }
 
   const implementation = generateNestjsImplementation(verbOptions, options);
@@ -415,8 +428,20 @@ export const mergeRouteMap = (
   });
 
   files.push({
+    path: upath.join(dirname, `utils/render-route.util${extension}`),
+    content: `export const renderRoute = (
+  template: string,
+  params: Record<string, string>,
+): string =>
+  template.replace(/\\{\\{(\\w+)\\}\\}/g, (_: string, key: string) => params[key] ?? '');
+`,
+  });
+
+  files.push({
     path: upath.join(dirname, `utils/index${extension}`),
-    content: `export { mergeRouteMap } from './merge-route-map.util';\n`,
+    content: `export { mergeRouteMap } from './merge-route-map.util';
+export { renderRoute } from './render-route.util';
+`,
   });
 
   // --- Module ---
