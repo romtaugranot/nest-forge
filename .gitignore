@@ -10,3 +10,10 @@ Thumbs.db
 # Generated SDK output (test artifacts)
 ise-ers/
 model/
+
+# Claude Code local settings and workspace artifacts
+.claude/settings.local.json
+.claude/skills/*-workspace/
+
+# External API specs
+ERS_APIs.yaml

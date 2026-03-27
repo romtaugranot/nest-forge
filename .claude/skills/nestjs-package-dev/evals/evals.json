@@ -1,0 +1,53 @@
+{
+  "skill_name": "nestjs-package-dev",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "hey, I've been working on this nest-forge package for a while. Can you check if it's ready to publish to npm? I want to make sure I'm not missing anything important before I put it out there.",
+      "expected_output": "A structured audit report covering all 12 checklist sections with pass/fail status, specific findings for each section, and actionable fix suggestions. Should run CLI commands like npm pack --dry-run, npm audit, npm run build, npm test.",
+      "files": [],
+      "expectations": [
+        "The output includes a summary table with pass/fail for each audit section",
+        "The audit checks package.json fields (name, version, description, exports, files, engines, etc.)",
+        "The audit checks TypeScript configuration (strict mode, declarations, build config)",
+        "The audit verifies CI/CD workflows exist and are properly configured",
+        "The audit checks for NestJS-specific patterns (module exports, forRoot/forRootAsync)",
+        "The audit runs at least some CLI commands (npm pack --dry-run, npm audit, or npm run build)",
+        "The audit checks documentation completeness (README, LICENSE, CONTRIBUTING, CHANGELOG)",
+        "The output provides specific actionable items for any failures found",
+        "The audit references or follows the pre-publish checklist from the skill"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I need you to look at my package's API from the perspective of someone who just discovered it on npm. Is it user-friendly? Am I missing anything that NestJS developers would expect from an SDK generator package?",
+      "expected_output": "A consumer-perspective API review covering import experience, module configuration, service methods, type safety, error handling, and comparison with similar packages. Findings organized by severity.",
+      "files": [],
+      "expectations": [
+        "The review examines the barrel file (index.ts) exports from a consumer perspective",
+        "The review traces a typical usage flow (import, configure, use)",
+        "The review checks if all necessary types and interfaces are exported",
+        "The review evaluates naming clarity of public methods and classes",
+        "The review identifies missing features or sharp edges a consumer would notice",
+        "The review organizes findings by severity (blocking, should-fix, nice-to-have)",
+        "The review considers peer dependency reasonableness",
+        "The review searches online or compares with similar NestJS packages"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I want to release a new version of my package. I added some new helper functions and fixed a bug in the route parameter extraction since v1.0.0. Walk me through the full release process.",
+      "expected_output": "A step-by-step release walkthrough covering semver decision, pre-release checks, CHANGELOG update, version bump, git tag, and publish verification. Should determine this is a minor bump (new features + bug fix).",
+      "files": [],
+      "expectations": [
+        "The output recommends the correct semver bump type (minor, since new features were added)",
+        "The output includes running quality gates (lint, test, build) before releasing",
+        "The output includes updating CHANGELOG.md with the new version entry",
+        "The output includes the npm version or manual version bump command",
+        "The output includes git tag creation and push commands",
+        "The output explains how the release workflow will publish automatically (or provides manual publish steps)",
+        "The output includes post-release verification steps (npm view, test install)"
+      ]
+    }
+  ]
+}

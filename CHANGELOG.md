@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.2] - 2026-03-27
+
+### Added
+- Publishing gate rule: never publish to npm until all CI workflows succeed
+- NestJS package development skill with pre-publish and version-release checklists
+
+### Changed
+- CONTRIBUTING.md now includes a publishing section with CI gate requirement
+
 ## [1.1.0] - 2026-03-27
 
 ### Added

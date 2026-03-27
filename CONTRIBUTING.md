@@ -41,6 +41,10 @@ This project follows strict TypeScript conventions documented in `CLAUDE.md`. Ke
 3. Ensure `npm run lint`, `npm run format:check`, and `npm test` all pass
 4. Keep PRs focused -- one feature or fix per PR
 
+## Publishing
+
+Only maintainers publish to npm. A new version must **never** be published until all CI workflows have passed on the commit being released. If any workflow is failing, fix the issue and wait for a clean CI run before publishing.
+
 ## Reporting Issues
 
 Use [GitHub Issues](https://github.com/romtaugranot/nest-forge/issues) with a clear title and description.
