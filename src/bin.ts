@@ -15,7 +15,10 @@ interface ParsedArguments {
 }
 
 const parseCsvArg = (value: string): string[] =>
-  value.split(',').map((tag) => tag.trim()).filter(Boolean);
+  value
+    .split(',')
+    .map((tag) => tag.trim())
+    .filter(Boolean);
 
 const parseArgs = (argv: string[]): ParsedArguments => {
   let input: string | undefined;

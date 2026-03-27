@@ -160,7 +160,10 @@ const extractReferencedNames = (outputDir: string): Set<string> | null => {
     if (!match) {
       return [];
     }
-    return match[1].split(',').map((s) => s.trim()).filter(Boolean);
+    return match[1]
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
   };
 
   const names = [
@@ -257,15 +260,13 @@ export type ${names.outputTypeName} = z.output<typeof ${names.schemaName}>;
 
   for (const [tag, entries] of groups) {
     // Build combined schema file
-    const hasEscapedStrings = entries.some(
-      ({ parsed, names }) => {
-        const body = parsed.schemaBody.replace(
-          `export const ${parsed.originalName}`,
-          `export const ${names.schemaName}`,
-        );
-        return body.includes('\\"') || body.includes('\\*');
-      },
-    );
+    const hasEscapedStrings = entries.some(({ parsed, names }) => {
+      const body = parsed.schemaBody.replace(
+        `export const ${parsed.originalName}`,
+        `export const ${names.schemaName}`,
+      );
+      return body.includes('\\"') || body.includes('\\*');
+    });
 
     const schemaParts: string[] = [];
     if (hasEscapedStrings) {
@@ -371,8 +372,14 @@ export type ${names.outputTypeName} = z.output<typeof ${names.schemaName}>;
     const typesBarrel = join(typesDir, 'index.ts');
     const existingSchemas = readFileSync(schemasBarrel, 'utf-8');
     const existingTypes = readFileSync(typesBarrel, 'utf-8');
-    writeFileSync(schemasBarrel, existingSchemas.trimEnd() + `\nexport * from './${names.kebabBase}.schema';\n`);
-    writeFileSync(typesBarrel, existingTypes.trimEnd() + `\nexport * from './${names.kebabBase}.type';\n`);
+    writeFileSync(
+      schemasBarrel,
+      existingSchemas.trimEnd() + `\nexport * from './${names.kebabBase}.schema';\n`,
+    );
+    writeFileSync(
+      typesBarrel,
+      existingTypes.trimEnd() + `\nexport * from './${names.kebabBase}.type';\n`,
+    );
   }
 
   if (missingTypes.length > 0) {

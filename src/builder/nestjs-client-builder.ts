@@ -156,9 +156,20 @@ const generateNestjsImplementation = (
   // Extract the primary (non-primitive) type for validateResponse schema argument.
   // Union types like "FooResponse | string" are valid TS annotations but not valid
   // JS expressions — only the schema identifier can be passed to validateResponse.
-  const PRIMITIVE_TYPES = new Set(['string', 'number', 'boolean', 'void', 'unknown', 'null', 'undefined']);
+  const PRIMITIVE_TYPES = new Set([
+    'string',
+    'number',
+    'boolean',
+    'void',
+    'unknown',
+    'null',
+    'undefined',
+  ]);
   const primaryType = dataType.includes('|')
-    ? dataType.split('|').map((t) => t.trim()).find((t) => !PRIMITIVE_TYPES.has(t)) ?? dataType
+    ? (dataType
+        .split('|')
+        .map((t) => t.trim())
+        .find((t) => !PRIMITIVE_TYPES.has(t)) ?? dataType)
     : dataType;
 
   const axiosOptions = generateOptions({
@@ -234,9 +245,20 @@ const generateNestjsClient: ClientBuilder = (
   if (responseType && responseType !== 'void') {
     // For union types like "FooResponse | string", import only the primary
     // (non-primitive) type as a value — primitives don't need importing.
-    const PRIMITIVE_TYPES = new Set(['string', 'number', 'boolean', 'void', 'unknown', 'null', 'undefined']);
+    const PRIMITIVE_TYPES = new Set([
+      'string',
+      'number',
+      'boolean',
+      'void',
+      'unknown',
+      'null',
+      'undefined',
+    ]);
     const primaryImportType = responseType.includes('|')
-      ? responseType.split('|').map((t) => t.trim()).find((t) => !PRIMITIVE_TYPES.has(t))
+      ? responseType
+          .split('|')
+          .map((t) => t.trim())
+          .find((t) => !PRIMITIVE_TYPES.has(t))
       : responseType;
     if (primaryImportType) {
       valueImports.push({ name: primaryImportType, values: true });
