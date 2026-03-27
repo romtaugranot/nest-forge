@@ -25,11 +25,15 @@ Built on top of [orval](https://orval.dev) with a custom NestJS builder and post
 
 - **Full NestJS module** with `forRoot` / `forRootAsync` dynamic configuration
 - **Zod schema validation** on every response via `safeParse`
-- **Typed route map** with Mustache templates for parameterized URLs, injectable and overridable through the module
+- **Typed route map** with template parameters for parameterized URLs, injectable and overridable through the module
+- **Tag filtering** -- generate only a subset of a large API with `--tags` or `--exclude-tags`
+- **Schema batching** -- schemas and types grouped by OpenAPI tag into combined files, with unused schemas pruned automatically
 - **Split file structure** following NestJS conventions: `schemas/`, `types/`, `exceptions/`, `interfaces/`, `data/`, `utils/`
 - **Kebab-case file naming** derived automatically from the OpenAPI spec title
+- **Automatic operation naming** -- derives method names from HTTP verb + route path when `operationId` is missing
 - **Controller prefix stripping** from operation names (`SessionController_createSession` becomes `createSession`)
 - **Custom exception classes** extending NestJS `HttpException` with proper Axios error wrapping
+- **Zero runtime dependencies** in the generated SDK beyond `@nestjs/common`, `axios`, and `zod`
 - **Zero hardcoded URLs** in the service -- all routes come from an injectable route map
 
 ## Installation
@@ -41,7 +45,7 @@ npm install -D nest-forge-sdk
 The generated code requires these peer dependencies in your project:
 
 ```bash
-npm install @nestjs/common axios zod mustache
+npm install @nestjs/common axios zod
 ```
 
 ## Quick Start
@@ -57,6 +61,12 @@ npx nest-forge-sdk ./openapi.yaml
 
 # Specify output directory
 npx nest-forge-sdk --input ./openapi.yml --output ./libs
+
+# Generate only specific tags
+npx nest-forge-sdk ./openapi.yaml --tags endpoint,user
+
+# Exclude specific tags
+npx nest-forge-sdk ./openapi.yaml --exclude-tags admin,internal
 ```
 
 ### Programmatic
@@ -67,6 +77,7 @@ import { generate } from 'nest-forge-sdk';
 await generate({
   input: './openapi.json', // JSON and YAML both supported
   outputDir: './libs',
+  tags: ['endpoint', 'user'], // optional: include only these tags
 });
 ```
 
@@ -94,20 +105,23 @@ libs/
       user-route-map.interface.ts   # Typed route map interface
       user-module-options.interface.ts  # forRoot / forRootAsync option types
       index.ts
-    schemas/                     # Zod schemas (one per OpenAPI component)
-      create-user.schema.ts
-      user-info.schema.ts
-      ...
+    schemas/                     # Zod schemas, batched by OpenAPI tag
+      user.schema.ts             # All user-related schemas in one file
+      session.schema.ts
+      common.schema.ts           # Shared schemas not tied to a specific tag
       index.ts
-    types/                       # Inferred TypeScript types from schemas
-      create-user.type.ts
-      user-info.type.ts
-      ...
+    types/                       # Inferred TypeScript types, batched by tag
+      user.type.ts
+      session.type.ts
+      common.type.ts
       index.ts
     utils/
       merge-route-map.util.ts    # Merges default routes with overrides
+      render-route.util.ts       # Resolves {{param}} templates in routes
       index.ts
 ```
+
+Only schemas actually referenced by the generated service are included -- unused component schemas from the OpenAPI spec are pruned automatically.
 
 ## Using the Generated Module
 
@@ -204,9 +218,11 @@ export class MyService {
    - Exception classes, interfaces, data constants, and utility files
 
 2. **Post-processing** -- Transforms orval's flat Zod model output:
-   - Splits each `.zod.ts` file into separate `schemas/` and `types/` directories
+   - Prunes unreferenced component schemas that the service doesn't use
+   - Batches schemas and types by OpenAPI tag into combined files (`endpoint.schema.ts`, `user.schema.ts`, etc.)
    - Renames schema constants (`UserDto` becomes `UserSchema`)
    - Strips `Dto` suffix from type names (`UserDto` becomes `User`)
+   - Generates fallback Zod schemas for params types that orval doesn't produce as model files
    - Rewrites all imports in the service file to point to the new locations
    - Generates barrel `index.ts` files for each directory
 
@@ -220,13 +236,13 @@ All names are derived from the OpenAPI spec's `info.title`:
 | `payment-gateway` | `payment-gateway/` | `PaymentGatewayService` | `PaymentGatewayModule` |
 | `ssh-session-service` | `ssh-session/` | `SshSessionService` | `SshSessionModule` |
 
-Operation names have their controller prefix stripped automatically:
-- `UserController_getUser` becomes `getUser`
-- `HealthController_live` becomes `live`
+Operation names are derived from the spec:
+- With `operationId`: controller prefix is stripped (`UserController_getUser` becomes `getUser`)
+- Without `operationId`: names are derived from the HTTP verb + route path (`GET /users/{id}` becomes `getUsersById`)
 
 ### Route Map
 
-Routes are extracted from the OpenAPI spec into a typed route map with Mustache templates for parameters:
+Routes are extracted from the OpenAPI spec into a typed route map with `{{param}}` templates for parameters:
 
 ```typescript
 // Generated: data/default-routes.data.ts
@@ -237,13 +253,13 @@ export const DEFAULT_ROUTES: UserRouteMap = {
 };
 ```
 
-The service resolves parameterized routes at runtime using [Mustache](https://github.com/janl/mustache.js):
+The service resolves parameterized routes at runtime using a lightweight inline template function (no external dependencies):
 
 ```typescript
 // Static route -- used directly
 await this.axiosInstance.get(this.routeMap.listUsers, options);
 
-// Parameterized route -- resolved via Mustache
+// Parameterized route -- resolved via renderRoute
 await this.axiosInstance.get(renderRoute(this.routeMap.getUser, { id }), options);
 ```
 
@@ -281,13 +297,15 @@ private handleError(error: unknown): never {
 nest-forge-sdk <openapi-spec> [options]
 
 Options:
-  -i, --input <path>    Path or URL to the OpenAPI spec (JSON/YAML)
-  -o, --output <dir>    Output directory (default: current directory)
-  -v, --version         Show version number
-  -h, --help            Show help
+  -i, --input <path|url>    Path or URL to the OpenAPI spec (JSON/YAML)
+  -o, --output <dir>        Output directory (default: current directory)
+  -t, --tags <tags>         Comma-separated tags to include (e.g. endpoint,user)
+      --exclude-tags <tags> Comma-separated tags to exclude
+  -v, --version             Show version number
+  -h, --help                Show help
 ```
 
-> The `nest-forge` command is also available as an alias for backward compatibility.
+> The `nest-forge` command is also available as an alias.
 
 ## Programmatic API
 
@@ -299,8 +317,10 @@ Runs the full generation pipeline.
 import { generate } from 'nest-forge-sdk';
 
 await generate({
-  input: './openapi.json',   // Path to OpenAPI spec, JSON or YAML (required)
-  outputDir: './libs',       // Output directory (optional, defaults to '.')
+  input: './openapi.json',       // Path to OpenAPI spec, JSON or YAML (required)
+  outputDir: './libs',           // Output directory (optional, defaults to '.')
+  tags: ['endpoint', 'user'],    // Include only these tags (optional)
+  excludeTags: ['internal'],     // Exclude these tags (optional, mutually exclusive with tags)
 });
 ```
 
@@ -325,7 +345,7 @@ export default defineConfig({
 });
 ```
 
-### `postProcess(modelDir, outputDir)`
+### `postProcess(modelDir, outputDir, tags?)`
 
 The post-processing step as a standalone function, for use with custom orval configs:
 
@@ -334,13 +354,16 @@ import { postProcess } from 'nest-forge-sdk';
 
 // After running orval...
 postProcess('./model', './my-client');
+
+// With tag-based schema batching
+postProcess('./model', './my-client', ['endpoint', 'user', 'session']);
 ```
 
 ## Requirements
 
 - Node.js >= 18
-- TypeScript >= 5.0
-- The target project must have `@nestjs/common`, `axios`, `zod`, and `mustache` installed
+- TypeScript >= 5.0 with `experimentalDecorators: true` (standard in NestJS projects)
+- The target project must have `@nestjs/common`, `axios`, and `zod` installed
 
 ## Contributing
 
