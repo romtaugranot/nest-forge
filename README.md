@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/nest-forge-sdk.svg)](https://www.npmjs.com/package/nest-forge-sdk)
 [![license](https://img.shields.io/npm/l/nest-forge-sdk.svg)](https://github.com/romtaugranot/nest-forge/blob/main/LICENSE)
 
-Generate fully-structured NestJS client SDK modules from OpenAPI specs. Point it at a spec, get a production-ready NestJS module with typed service, Zod validation, injectable routes, and dynamic module configuration.
+Generate fully-structured NestJS client SDK modules from OpenAPI specs (JSON or YAML). Point it at a spec, get a production-ready NestJS module with typed service, Zod validation, injectable routes, and dynamic module configuration.
 
 Built on top of [orval](https://orval.dev) with a custom NestJS builder and post-processing pipeline.
 
@@ -50,10 +50,13 @@ npm install @nestjs/common axios zod mustache
 
 ```bash
 # Minimal -- output goes to current directory
-npx nest-forge ./openapi.json
+npx nest-forge-sdk ./openapi.json
+
+# YAML support
+npx nest-forge-sdk ./openapi.yaml
 
 # Specify output directory
-npx nest-forge --input ./openapi.json --output ./libs
+npx nest-forge-sdk --input ./openapi.yml --output ./libs
 ```
 
 ### Programmatic
@@ -62,7 +65,7 @@ npx nest-forge --input ./openapi.json --output ./libs
 import { generate } from 'nest-forge-sdk';
 
 await generate({
-  input: './openapi.json',
+  input: './openapi.json', // JSON and YAML both supported
   outputDir: './libs',
 });
 ```
@@ -275,14 +278,16 @@ private handleError(error: unknown): never {
 ## CLI Reference
 
 ```
-nest-forge <openapi-spec> [options]
+nest-forge-sdk <openapi-spec> [options]
 
 Options:
-  -i, --input <path>    Path to the OpenAPI spec (JSON)
+  -i, --input <path>    Path or URL to the OpenAPI spec (JSON/YAML)
   -o, --output <dir>    Output directory (default: current directory)
   -v, --version         Show version number
   -h, --help            Show help
 ```
+
+> The `nest-forge` command is also available as an alias for backward compatibility.
 
 ## Programmatic API
 
@@ -294,7 +299,7 @@ Runs the full generation pipeline.
 import { generate } from 'nest-forge-sdk';
 
 await generate({
-  input: './openapi.json',   // Path to OpenAPI spec (required)
+  input: './openapi.json',   // Path to OpenAPI spec, JSON or YAML (required)
   outputDir: './libs',       // Output directory (optional, defaults to '.')
 });
 ```

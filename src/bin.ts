@@ -45,22 +45,23 @@ const getVersion = (): string => {
 
 const printUsage = (): void => {
   console.log(`
-  nest-forge - Generate NestJS client SDK modules from OpenAPI specs
+  nest-forge-sdk - Generate NestJS client SDK modules from OpenAPI specs
 
   Usage:
-    nest-forge <openapi-spec>  [options]
-    nest-forge --input <path|url>  [options]
+    nest-forge-sdk <openapi-spec>  [options]
+    nest-forge-sdk --input <path|url>  [options]
 
   Options:
-    -i, --input <path|url>  Path or URL to the OpenAPI spec (JSON)
+    -i, --input <path|url>  Path or URL to the OpenAPI spec (JSON/YAML)
     -o, --output <dir>      Output directory (default: current directory)
     -v, --version           Show version number
     -h, --help              Show this help message
 
   Examples:
-    nest-forge ./openapi.json
-    nest-forge --input ./api/spec.json --output ./sdk
-    nest-forge http://localhost:3000/api/docs-json --output ./sdk
+    nest-forge-sdk ./openapi.json
+    nest-forge-sdk ./openapi.yaml
+    nest-forge-sdk --input ./api/spec.yml --output ./sdk
+    nest-forge-sdk https://api.example.com/docs-json --output ./sdk
 `);
 };
 

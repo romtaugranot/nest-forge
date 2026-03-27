@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-03-27
+
+### Added
+- YAML (.yaml/.yml) OpenAPI spec support for both local files and URL inputs
+- `nest-forge-sdk` as primary CLI binary name (alongside `nest-forge` alias for backward compatibility)
+
 ## [1.0.0] - 2026-03-26
 
 ### Added

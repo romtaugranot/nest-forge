@@ -3,5 +3,6 @@ dist
 coverage
 *.tgz
 *.log
+.nest-forge.spec.*
 .DS_Store
 Thumbs.db

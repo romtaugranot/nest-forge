@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync, unlinkSync, mkdirSync } from 'fs';
 import { resolve, join } from 'path';
 import { generate as orvalGenerate } from 'orval';
 import type { NestForgeConfig } from './interfaces';
-import { deriveKebabBase } from './helpers';
+import { deriveKebabBase, parseSpec, isYamlContent } from './helpers';
 import { postProcess } from './post-process';
 import { log } from './logger';
 
@@ -95,7 +95,8 @@ export const generate = async (config: NestForgeConfig): Promise<void> => {
     log.info(`Fetching spec from ${config.input}...`);
     const specContent = await fetchSpec(config.input);
     mkdirSync(outputBase, { recursive: true });
-    tempSpecPath = join(outputBase, '.nest-forge.spec.json');
+    const specExtension = isYamlContent(specContent) ? '.yaml' : '.json';
+    tempSpecPath = join(outputBase, `.nest-forge.spec${specExtension}`);
     writeFileSync(tempSpecPath, specContent);
     inputPath = tempSpecPath;
   } else {
@@ -104,7 +105,7 @@ export const generate = async (config: NestForgeConfig): Promise<void> => {
 
   try {
     // Read spec to derive names
-    const parsed: unknown = JSON.parse(readFileSync(inputPath, 'utf-8'));
+    const parsed: unknown = parseSpec(readFileSync(inputPath, 'utf-8'));
     const specTitle = extractSpecTitle(parsed);
     const kebabBase = deriveKebabBase(specTitle);
 
