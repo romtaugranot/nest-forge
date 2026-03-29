@@ -1,0 +1,33 @@
+{
+  "name": "nest-forge",
+  "owner": {
+    "name": "Rom Granot",
+    "email": "rom.granot@gmail.com"
+  },
+  "metadata": {
+    "description": "AI-assisted NestJS SDK generation from OpenAPI specs",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "nest-forge-sdk",
+      "source": ".",
+      "description": "AI-assisted NestJS SDK generation from OpenAPI specs using nest-forge-sdk. Guides you through spec discovery, SDK generation, and module wiring.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Rom Granot",
+        "email": "rom.granot@gmail.com"
+      },
+      "homepage": "https://github.com/romtaugranot/nest-forge#readme",
+      "repository": "https://github.com/romtaugranot/nest-forge.git",
+      "license": "MIT",
+      "keywords": [
+        "nestjs",
+        "openapi",
+        "sdk",
+        "codegen",
+        "nest-forge"
+      ]
+    }
+  ]
+}
