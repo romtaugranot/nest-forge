@@ -14,13 +14,17 @@ nest-forge ships as a [Claude Code plugin](https://docs.anthropic.com/en/docs/cl
 ### Install the plugin
 
 ```bash
-claude plugin add github:romtaugranot/nest-forge
+# Add the marketplace
+claude plugin marketplace add romtaugranot/nest-forge
+
+# Install the plugin
+claude plugin install nest-forge-sdk
 ```
 
 Once installed, Claude Code will automatically suggest using `nest-forge-sdk` when you're integrating with an external API or mention OpenAPI specs. You can also invoke the skill directly:
 
 ```
-/nest-forge-sdk:nestjs-sdk-generator
+/nestjs-sdk-generator
 ```
 
 ### What the skill does
